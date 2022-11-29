@@ -1,7 +1,7 @@
 var listAcc = [];
 var listDep = [];
 var listPos = [];
-var vitri = -1;
+var idCanSua = -1;
 
 function department() {
     var dep1 = {
@@ -70,53 +70,40 @@ $(function(){
 
 function table() {
 
-    var acc1 = {
-        id: 1,
-        name: "Nguyen Van A",
-        email: "nguyenvana@gmail.com",
-        position: "DEV",
-        department: "ban hang 1" 
-    }
+    //  lay ds account tu mockapi ve
+    $.ajax({
+        type: "GET",
+        url: "https://63860b61beaa645826716bbf.mockapi.io/api/v1/account",
+        // data: "data",// chua du lieu de them hoac sua
+        // dataType: "dataType",
+        success: function (response) {
+            listAcc = response;
+            $("#body").empty();
+            // hien thi ds acc ra man hifnh
+            for (let i = 0; i < listAcc.length; i++) {
+                $("#body").append(`
+                <tr>
+                    <td>${listAcc[i].id}</td>
+                    <td>${listAcc[i].fullname}</td>
+                    <td>${listAcc[i].email}</td>
+                    <td>${listAcc[i].position}</td>
+                    <td>${listAcc[i].department}</td>
+                    <td>
+                        
+                    <button type="button" class="btn btn-default" onclick="handleEdit(${listAcc[i].id})" >Edit</button>
+           
+                    <button type="button" class="btn btn-danger" onclick="handleDelete(${listAcc[i].id})" >Delete</button>
+                    
+                    </td>
+                <tr>
+                `);
+        }
+        }
+    });
 
-    var acc2 = {
-        id: 2,
-        name: "Nguyen Van B",
-        email: "nguyenvanb@gmail.com",
-        position: "TEST",
-        department: "ban hang 2" 
-    }
-
-    var acc3 = {
-        id: 3,
-        name: "Nguyen Van C",
-        email: "nguyenvanc@gmail.com",
-        position: "PM",
-        department: "ban hang 3" 
-    }
-
-    listAcc.push(acc1);
-    listAcc.push(acc2);
-    listAcc.push(acc3);
-
-    for (let i = 0; i < listAcc.length; i++) {
-    $("#body").append(`
-    <tr>
-        <td>${listAcc[i].id}</td>
-        <td>${listAcc[i].name}</td>
-        <td>${listAcc[i].email}</td>
-        <td>${listAcc[i].position}</td>
-        <td>${listAcc[i].department}</td>
-        <td>
-            
-            <button type="button" class="btn btn-default">Edit</button>
-            
-            <button type="button" class="btn btn-danger">Delete</button>
-            
-        </td>
-    <tr>
-    `);
+    
         
-    }
+    
 }
 
 $("#add").click(function (e) { 
@@ -128,81 +115,62 @@ $("#add").click(function (e) {
 
     var acc = {
         id: id,
-        name: fullname,
+        fullname: fullname,
         email: email,
         position: position,
         department: department 
     }
-    listAcc.push(acc);
+    // dung api de them mowi account
+    $.ajax({
+        type: "POST",
+        url: "https://63860b61beaa645826716bbf.mockapi.io/api/v1/account",
+        data: acc,
+        // dataType: "dataType",
+        success: function (response) {
+            table();
+                alert("them  thanh cong");
+        }
+    });
 
-    // xoas body cua table di de hien thi lai ds acc
-    $("#body").empty();
-    console.log("lisst co "+ listAcc.length +" phan tu");
-    for (let i = 0; i < listAcc.length; i++) {
-        
-    $("#body").append(`
-    <tr>
-        <td>${listAcc[i].id}</td>
-        <td>${listAcc[i].name}</td>
-        <td>${listAcc[i].email}</td>
-        <td>${listAcc[i].position}</td>
-        <td>${listAcc[i].department}</td>
-        <td>
-            
-            <button type="button" class="btn btn-default" onclick="handleEdit(${i})" >Edit</button>
-            
-            <button type="button" class="btn btn-danger" onclick="handleDelete(${i})" >Delete</button>
-            
-        </td>
-    <tr>
-    `);
-        
-    }  
+      
     $("#id").val("");
     $("#fullname").val("");
     $("#email").val("");
-    alert("Add thanh cong");
+   
 });
 
-function handleDelete(i) {//  12345,  i=1,2
+function handleDelete(id) {//  12345,  i=1,2
    if( confirm("Ban co muon xoa ko?") == true){
-        listAcc.splice(i, 1);
-        alert("Delete thanh cong");
+
+        // dung ajax goi den api xoa 
+        $.ajax({
+            type: "DELETE",
+            url: "https://63860b61beaa645826716bbf.mockapi.io/api/v1/account/"+id,
+            // data: "data",
+            // dataType: "dataType",
+            success: function (response) {
+               
+                table();
+                alert("Delete thanh cong");
+            }
+        });
    }
-   // xoas body cua table di de hien thi lai ds acc
-   $("#body").empty();
-   console.log("lisst co "+ listAcc.length +" phan tu");
-   for (let i = 0; i < listAcc.length; i++) {
-       
-   $("#body").append(`
-   <tr>
-       <td>${listAcc[i].id}</td>
-       <td>${listAcc[i].name}</td>
-       <td>${listAcc[i].email}</td>
-       <td>${listAcc[i].position}</td>
-       <td>${listAcc[i].department}</td>
-       <td>
-           <button type="button" class="btn btn-default" onclick="handleEdit(${i})" >Edit</button>
-           <button type="button" class="btn btn-danger" onclick="handleDelete(${i})" >Delete</button>
-       </td>
-   <tr>
-   `); 
-   
-   }  
+  
    
 }
 
-function handleEdit(i) {
-    $("#id").val(listAcc[i].id);
-    $("#fullname").val(listAcc[i].name);
-    $("#email").val(listAcc[i].email);
-    $("#inputDepartment").val(listAcc[i].department);
-    $("#inputPosition").val(listAcc[i].position);
-    vitri = i;
+function handleEdit(id) {
+    var acc = listAcc.find(acc => acc.id == id);
+    $("#id").val(acc.id);
+    $("#fullname").val(acc.fullname);
+    $("#email").val(acc.email);
+    $("#inputDepartment").val(acc.department);
+    $("#inputPosition").val(acc.position);
+    idCanSua = id;
 }
 
 $("#update").click(function (e) { 
-    if(vitri == -1){
+    if(idCanSua == -1){
         alert("Chua chon ptu de edit");
     }else{
         var id = $("#id").val();
@@ -213,40 +181,54 @@ $("#update").click(function (e) {
     
         var accc = {
             id: id,
-            name: fullname,
+            fullname: fullname,
             email: email,
             position: position,
             department: department 
         }
     
-        listAcc.splice(vitri, 1, accc);
+       // update account dung api   (ajax laf cong cu de call api)
+       $.ajax({
+        type: "PUT",
+        url: "https://63860b61beaa645826716bbf.mockapi.io/api/v1/account/"+id,
+        data: accc,
+        // dataType: "dataType",
+        success: function (response) {
+            alert("Upadate thanh cong");
+            idCanSua = -1;
+            table();
+            $("#id").val("");
+            $("#fullname").val("");
+            $("#email").val("");
+        }
+       });
     
-        $("#body").empty();
-        console.log("lisst co "+ listAcc.length +" phan tu");
-        for (let i = 0; i < listAcc.length; i++) {
+        // $("#body").empty();
+        // console.log("lisst co "+ listAcc.length +" phan tu");
+        // for (let i = 0; i < listAcc.length; i++) {
             
-        $("#body").append(`
-        <tr>
-            <td>${listAcc[i].id}</td>
-            <td>${listAcc[i].name}</td>
-            <td>${listAcc[i].email}</td>
-            <td>${listAcc[i].position}</td>
-            <td>${listAcc[i].department}</td>
-            <td>
+        // $("#body").append(`
+        // <tr>
+        //     <td>${listAcc[i].id}</td>
+        //     <td>${listAcc[i].name}</td>
+        //     <td>${listAcc[i].email}</td>
+        //     <td>${listAcc[i].position}</td>
+        //     <td>${listAcc[i].department}</td>
+        //     <td>
                 
-                <button type="button" class="btn btn-default" onclick="handleEdit(${i})" >Edit</button>
+        //         <button type="button" class="btn btn-default" onclick="handleEdit(${i})" >Edit</button>
                 
-                <button type="button" class="btn btn-danger" onclick="handleDelete(${i})" >Delete</button>
+        //         <button type="button" class="btn btn-danger" onclick="handleDelete(${i})" >Delete</button>
                 
-            </td>
-        <tr>
-        `);
-        }  
-        $("#id").val("");
-        $("#fullname").val("");
-        $("#email").val("");
-        alert("Upadate thanh cong");
-        vitri = -1;
+        //     </td>
+        // <tr>
+        // `);
+        // }  
+        // $("#id").val("");
+        // $("#fullname").val("");
+        // $("#email").val("");
+        // alert("Upadate thanh cong");
+        // vitri = -1;
     }
     
     
